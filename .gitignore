@@ -9,6 +9,9 @@ venv/
 # Ignore test cache
 .pytest_cache/
 
+# Key name
+subtle-harmony-471723-f2-3aeb912f9a0d.json
+
 # Ignore IDE files (optional)
 .vscode/
 .idea/
