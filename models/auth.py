@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
 
-class SignupRequest(BaseModel):
+class SignupLoginRequest(BaseModel):
     email: EmailStr        # ensures valid email format
     password: str

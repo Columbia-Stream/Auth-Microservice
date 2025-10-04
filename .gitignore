@@ -10,7 +10,7 @@ venv/
 .pytest_cache/
 
 # Key name
-subtle-harmony-471723-f2-3aeb912f9a0d.json
+qualified-root-474022-u3-a97670d29036.json
 
 # Ignore IDE files (optional)
 .vscode/
@@ -20,3 +20,5 @@ subtle-harmony-471723-f2-3aeb912f9a0d.json
 *.egg-info/
 dist/
 build/
+
+.venv
