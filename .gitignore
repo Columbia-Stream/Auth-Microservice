@@ -9,8 +9,7 @@ venv/
 # Ignore test cache
 .pytest_cache/
 
-# Key name
-qualified-root-474022-u3-a97670d29036.json
+# Key nameß
 
 # Ignore IDE files (optional)
 .vscode/
