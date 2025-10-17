@@ -15,7 +15,7 @@ def test_connection():
             database='Project_SQL'
         )
         if connection.is_connected():
-            print("✅ Successfully connected to the DB")
+            print("Successfully connected to the DB")
             cursor = connection.cursor(dictionary=True)  # dictionary=True for column
             cursor.execute("SHOW TABLES;")
             print(cursor.fetchall())
@@ -30,7 +30,7 @@ def test_connection():
             else:
                 print("No users found in the table")
         else:
-            print("⚠️ Connection object created but not connected")
+            print("Connection object created but not connected")
         connection.close()
     except Exception as e:
-        print("❌ DB connection failed:", e)
+        print("DB connection failed:", e)

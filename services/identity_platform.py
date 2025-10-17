@@ -9,7 +9,7 @@ from utils.config import FIREBASE_API_KEY
 def initialize_firebase():
     if not firebase_admin._apps:
         sa_dict = get_service_account()  # 🔹 called at runtime
-        print("Fetched SA:", sa_dict)
+        # print("Fetched SA:", sa_dict)
         cred = credentials.Certificate(sa_dict)
         firebase_admin.initialize_app(cred)
 
