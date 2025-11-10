@@ -6,8 +6,7 @@ load_dotenv()
 
 # GCP Settings
 PROJECT_ID = os.getenv("PROJECT_ID")
-SECRET_ID = os.getenv("SECRET_ID")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# SECRET_ID = os.getenv("SECRET_ID")
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
 
 # MySQL Settings

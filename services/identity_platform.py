@@ -1,17 +1,19 @@
 # services/identity_platform.py
 import firebase_admin
 from firebase_admin import credentials, auth
-from utils.secrets_manager import get_service_account
 import requests
-from utils.config import FIREBASE_API_KEY
+from utils.config import FIREBASE_API_KEY, PROJECT_ID
 
 # Initialize Firebase Admin SDK (only once)
 def initialize_firebase():
     if not firebase_admin._apps:
-        sa_dict = get_service_account()  # 🔹 called at runtime
-        # print("Fetched SA:", sa_dict)
-        cred = credentials.Certificate(sa_dict)
-        firebase_admin.initialize_app(cred)
+        creds = credentials.ApplicationDefault()
+        
+        # 2. Initialize the app, passing in both the
+        #    credentials AND your Project ID.
+        firebase_admin.initialize_app(creds, {
+            'projectId': PROJECT_ID,
+        })
 
 def create_user_in_identity_platform(email: str, password: str):
     """
