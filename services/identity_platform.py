@@ -27,6 +27,12 @@ def create_user_in_identity_platform(email: str, password: str):
     return user_record
 
 
+def set_user_role_in_identity_platform(uid: str, role: str):
+    """Stores a user's role as a Firebase custom claim."""
+    initialize_firebase()
+    auth.set_custom_user_claims(uid, {"role": role})
+
+
 
 def login_user(email: str, password: str):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
