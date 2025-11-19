@@ -1,12 +1,13 @@
 # resources/auth.py
 from fastapi import APIRouter, HTTPException, Header
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token
-from models.auth import SignupLoginRequest
+from models.auth import SignupRequest, LoginRequest
+from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db
 
 router = APIRouter()
 
 @router.post("/signup")
-async def signup(user: SignupLoginRequest):
+async def signup(user: SignupRequest):
     """
     Endpoint to create a new user in Identity Platform.
     """
@@ -14,6 +15,13 @@ async def signup(user: SignupLoginRequest):
         user_record = create_user_in_identity_platform(
             email=user.email,
             password=user.password
+        )
+        # Also insert user details into the database
+        insert_in_db(
+            email=user.email,
+            password=user.password,
+            uni=user.uni,
+            role=user.role
         )
         return {
             "uid": user_record.uid,
@@ -23,13 +31,17 @@ async def signup(user: SignupLoginRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/login")
-def login(user: SignupLoginRequest):
+def login(user: LoginRequest):
     """
     Endpoint to log in a user and return an ID token.
     """
     try:
         auth_response = login_user(email=user.email, password=user.password)
-        return {"id_token": auth_response["idToken"], "email": auth_response["email"]}
+        db_results = get_user_from_db(email=user.email)
+        if not db_results:
+            raise HTTPException(status_code=404, detail="User not found in database")
+        
+        return {"id_token": auth_response["idToken"], "email": auth_response["email"], "role": db_results[0]["role"], "uni": db_results[0]["uni"]}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

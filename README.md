@@ -1,5 +1,6 @@
 # Auth Microservice
 
+## To Start the App.
 ## Overview
 
 This microservice is responsible for managing users. It exposes CRUD-style endpoints (GET/POST/PUT/DELETE) plus a health check, though most endpoints are currently stubbed.
