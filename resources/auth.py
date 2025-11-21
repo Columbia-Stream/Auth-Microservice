@@ -1,12 +1,12 @@
 # resources/auth.py
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, status
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token
 from models.auth import SignupRequest, LoginRequest
 from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db
 
 router = APIRouter()
 
-@router.post("/signup")
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup(user: SignupRequest):
     """
     Endpoint to create a new user in Identity Platform.
