@@ -21,7 +21,7 @@ async def signup(user: SignupRequest):
             password=user.password
         )
         # Also insert user details into the database
-        set_user_role_in_identity_platform(user_record.uid, user.role)
+        # set_user_role_in_identity_platform(user_record.uid, user.role)
         insert_in_db(
             email=user.email,
             password=user.password,
@@ -67,8 +67,9 @@ def protect(authorization: str = Header(...)):
     
     try:
         decoded_token = verify_token(id_token)
-
-        role = decoded_token.get("role")
+        print("Decoded Token:", decoded_token)
+        db_results = get_user_from_db_email(email=decoded_token.get("email"))
+        role = db_results[0]["role"]
         if role not in ROLE_ROUTES:
             raise HTTPException(status_code=403, detail="Unauthorized role")
         dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
