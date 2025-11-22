@@ -1,10 +1,14 @@
 # resources/auth.py
 from fastapi import APIRouter, HTTPException, Header, status
-from services.identity_platform import create_user_in_identity_platform, login_user, verify_token
+from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, set_user_role_in_identity_platform
 from models.auth import SignupRequest, LoginRequest
 from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db
 
 router = APIRouter()
+ROLE_ROUTES = {
+    "student": "/dashboard/student",
+    "faculty": "/dashboard/faculty"
+}
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup(user: SignupRequest):
@@ -17,6 +21,7 @@ async def signup(user: SignupRequest):
             password=user.password
         )
         # Also insert user details into the database
+        set_user_role_in_identity_platform(user_record.uid, user.role)
         insert_in_db(
             email=user.email,
             password=user.password,
@@ -25,7 +30,8 @@ async def signup(user: SignupRequest):
         )
         return {
             "uid": user_record.uid,
-            "email": user_record.email
+            "email": user_record.email,
+            "role": user.role
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -37,11 +43,15 @@ def login(user: LoginRequest):
     """
     try:
         auth_response = login_user(email=user.email, password=user.password)
+        
         db_results = get_user_from_db(email=user.email)
+        role = db_results[0]["role"]
+        dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
+
         if not db_results:
             raise HTTPException(status_code=404, detail="User not found in database")
         
-        return {"id_token": auth_response["idToken"], "email": auth_response["email"], "role": db_results[0]["role"], "uni": db_results[0]["uni"]}
+        return {"id_token": auth_response["idToken"], "email": auth_response["email"], "role": role, "uni": db_results[0]["uni"], "dashboard_route": dashboard_route}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -57,7 +67,12 @@ def protect(authorization: str = Header(...)):
     
     try:
         decoded_token = verify_token(id_token)
-        return {"message": "Access granted", "uid": decoded_token["uid"]}
+
+        role = decoded_token.get("role")
+        if role not in ROLE_ROUTES:
+            raise HTTPException(status_code=403, detail="Unauthorized role")
+        dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
+        return {"message": "Access granted", "uid": decoded_token["uid"], "role": role, "dashboard_route": dashboard_route}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     
