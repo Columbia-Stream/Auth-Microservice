@@ -69,6 +69,8 @@ def protect(authorization: str = Header(...)):
         decoded_token = verify_token(id_token)
         print("Decoded Token:", decoded_token)
         db_results = get_user_from_db_email(email=decoded_token.get("email"))
+        if not db_results:
+            raise HTTPException(status_code=404, detail="User not found in database")
         role = db_results[0]["role"]
         print("User Role from DB:", role, db_results)
         if role not in ROLE_ROUTES:
