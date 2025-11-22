@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Header, status
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, set_user_role_in_identity_platform
 from models.auth import SignupRequest, LoginRequest
-from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db
+from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni
 
 router = APIRouter()
 ROLE_ROUTES = {
@@ -44,7 +44,7 @@ def login(user: LoginRequest):
     try:
         auth_response = login_user(email=user.email, password=user.password)
         
-        db_results = get_user_from_db(email=user.email)
+        db_results = get_user_from_db_email(email=user.email)
         role = db_results[0]["role"]
         dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
 
@@ -73,6 +73,15 @@ def protect(authorization: str = Header(...)):
             raise HTTPException(status_code=403, detail="Unauthorized role")
         dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
         return {"message": "Access granted", "uid": decoded_token["uid"], "role": role, "dashboard_route": dashboard_route}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    
+@router.get("/get-user")
+def userDetailsUni(uni: str):
+    
+    try:
+        db_results = get_user_from_db_uni(uni=uni)
+        return {"message": "User found", "user": db_results}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     

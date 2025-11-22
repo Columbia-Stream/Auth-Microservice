@@ -25,7 +25,7 @@ def insert_in_db(email, password, uni, role):
         raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
 
 
-def get_user_from_db(email=None):
+def get_user_from_db_email(email=None):
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor(dictionary=True) # <-- Get dictionary results
@@ -35,3 +35,12 @@ def get_user_from_db(email=None):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
 
+def get_user_from_db_uni(uni=None):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor(dictionary=True) # <-- Get dictionary results
+            cursor.execute("SELECT * FROM Users WHERE uni=%s;", (uni,))
+            rows = cursor.fetchall()
+            return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
