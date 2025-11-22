@@ -70,6 +70,7 @@ def protect(authorization: str = Header(...)):
         print("Decoded Token:", decoded_token)
         db_results = get_user_from_db_email(email=decoded_token.get("email"))
         role = db_results[0]["role"]
+        print("User Role from DB:", role, db_results)
         if role not in ROLE_ROUTES:
             raise HTTPException(status_code=403, detail="Unauthorized role")
         dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
