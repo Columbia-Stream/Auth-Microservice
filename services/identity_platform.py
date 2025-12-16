@@ -27,6 +27,32 @@ def create_user_in_identity_platform(email: str, password: str):
     return user_record
 
 
+def delete_user_from_identity_platform(uid: str):
+    """
+    Deletes a user from Google Identity Platform using their User ID (UID).
+    
+    Args:
+        uid: The unique identifier (UID) of the user to delete.
+    """
+    initialize_firebase()
+    
+    try:
+        # 1. Check if the user exists (optional, but good for clear error handling)
+        # auth.get_user(uid) 
+        
+        # 2. Delete the user
+        auth.delete_user(uid)
+        print(f"Successfully deleted user with UID: {uid}")
+        return True
+        
+    except auth.UserNotFoundError:
+        print(f"Error: User with UID {uid} not found.")
+        return False
+        
+    except Exception as e:
+        print(f"An error occurred while deleting user {uid}: {e}")
+        return False
+
 def set_user_role_in_identity_platform(uid: str, role: str):
     """
     Sets custom claims (like roles) for a user in Google Identity Platform.

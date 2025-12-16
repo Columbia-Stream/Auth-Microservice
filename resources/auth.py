@@ -1,8 +1,9 @@
 # resources/auth.py
 from fastapi import APIRouter, HTTPException, Header, status
-from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, set_user_role_in_identity_platform
+from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, delete_user_from_identity_platform
 from models.auth import SignupRequest, LoginRequest
 from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni
+
 
 router = APIRouter()
 ROLE_ROUTES = {
@@ -53,6 +54,67 @@ def login(user: LoginRequest):
         
         return {"id_token": auth_response["idToken"], "email": auth_response["email"], "role": role, "uni": db_results[0]["uni"], "dashboard_route": dashboard_route}
     except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/handle-oauth", status_code=status.HTTP_201_CREATED)
+async def google_auth(authorization: str = Header(None)):
+    """
+    Endpoint to create a new user in Identity Platform.
+    """
+    try:
+        print("Authorization Header:")
+        if not authorization:
+            print("No Authorization header provided")
+            raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+        # Expect format: "Bearer <token>"
+        if not authorization.startswith("Bearer "):
+            print("No Authorization header provided 2")
+            raise HTTPException(status_code=401, detail="Invalid Authorization header")
+
+        # Extract token
+        id_token = authorization.split(" ")[1]
+        print("Received ID Token:", id_token)
+        # if not columbia.edu and barnard.edu - delete user and return proper response
+        # if user exists in db
+        # if user does not exist in db - create user with student role
+        claims = verify_token(id_token)
+        print("Token Claims:", claims)
+        # Claims is a dictionary containing the payload data:
+        user_uid = claims.get('uid')
+        user_email = claims.get('email')
+        
+        print(f"Token verified! UID: {user_uid}, Email: {user_email}")
+        if(not user_email.endswith("@columbia.edu") and not user_email.endswith("@barnard.edu")):
+            # delete user from identity platform
+            try:
+                delete_user_from_identity_platform(user_uid)
+                print(f"Deleted user with UID: {user_uid} due to unauthorized email domain.")
+            except Exception as e:
+                print(f"Error deleting user with UID: {user_uid}: {e}")
+            raise HTTPException(status_code=403, detail="Unauthorized email domain")
+        
+        #check if user exists in db
+        db_results = get_user_from_db_email(email=user_email)
+        
+
+        if not db_results:
+            insert_in_db(
+                email=user_email,
+                password='OAUTH_USER',
+                uni=user_email.split('@')[0],
+                role='student'
+            )
+            return {"id_token": id_token, "email": user_email, "role": 'student', "uni": user_email.split('@')[0], "dashboard_route": ROLE_ROUTES.get('student', "/dashboard")}
+        else:
+            role = db_results[0]["role"]
+            dashboard_route = ROLE_ROUTES.get(role, "/dashboard")
+            
+            return {"id_token": id_token, "email": user_email, "role": role, "uni": db_results[0]["uni"], "dashboard_route": dashboard_route}
+    
+    except Exception as e:
+        print(f"Error in Google OAuth handling: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/verify-token")
