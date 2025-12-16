@@ -24,6 +24,16 @@ def insert_in_db(email, password, uni, role):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
 
+def update_db(email,role):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor() # <-- Get dictionary results
+            query = "UPDATE Users SET role=%s WHERE email=%s;"
+            cursor.execute(query, (role, email))
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
+
 
 def get_user_from_db_email(email=None):
     try:

@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Header, status
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, delete_user_from_identity_platform
 from models.auth import SignupRequest, LoginRequest
-from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni
+from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni, update_db
 
 
 router = APIRouter()
@@ -148,6 +148,14 @@ def userDetailsUni(uni: str):
     try:
         db_results = get_user_from_db_uni(uni=uni)
         return {"message": "User found", "user": db_results}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    
+@router.put("/update-role")
+def update_role(email: str, role: str):
+    try:
+        update_db(email=email, role=role)
+        return {"message": "Profile updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     
