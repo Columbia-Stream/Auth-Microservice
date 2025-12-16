@@ -9,3 +9,7 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr        # ensures valid email format
     password: str
+
+class UpdateRoleRequest(BaseModel):
+    email: EmailStr        # ensures valid email format
+    role: Literal["student", "faculty"]

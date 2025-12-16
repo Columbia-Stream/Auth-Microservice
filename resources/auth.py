@@ -1,7 +1,7 @@
 # resources/auth.py
 from fastapi import APIRouter, HTTPException, Header, status
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, delete_user_from_identity_platform
-from models.auth import SignupRequest, LoginRequest
+from models.auth import SignupRequest, LoginRequest, UpdateRoleRequest
 from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni, update_db
 
 
@@ -152,9 +152,9 @@ def userDetailsUni(uni: str):
         raise HTTPException(status_code=401, detail=str(e))
     
 @router.put("/update-role")
-def update_role(email: str, role: str):
+def update_role(user: UpdateRoleRequest):
     try:
-        update_db(email=email, role=role)
+        update_db(email=user.email, role=user.role)
         return {"message": "Profile updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
