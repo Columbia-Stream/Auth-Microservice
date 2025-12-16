@@ -54,3 +54,13 @@ def get_user_from_db_uni(uni=None):
             return rows
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")
+    
+def get_profs_from_db(uni=None):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor(dictionary=True) # <-- Get dictionary results
+            cursor.execute("SELECT * FROM Users WHERE role='faculty';")
+            rows = cursor.fetchall()
+            return rows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {str(e)}")

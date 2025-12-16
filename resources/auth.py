@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Header, status
 from services.identity_platform import create_user_in_identity_platform, login_user, verify_token, delete_user_from_identity_platform
 from models.auth import SignupRequest, LoginRequest, UpdateRoleRequest
-from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni, update_db
+from utils.sql import get_all_users_from_db, insert_in_db, get_user_from_db_email, get_user_from_db_uni, update_db, get_profs_from_db
 
 
 router = APIRouter()
@@ -159,3 +159,11 @@ def update_role(user: UpdateRoleRequest):
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     
+@router.get("/get-profs")
+def profList():
+    try:
+        db_results = get_profs_from_db()
+        return {"message": "Professor List", "list": db_results}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+ 
